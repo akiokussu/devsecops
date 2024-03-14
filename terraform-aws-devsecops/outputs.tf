@@ -1,6 +1,9 @@
 
 # I will use this later after creation for the Ansible automation
 # terraform output -json > ../ansible-aws-devsecops/ansible_inventory.json
+#
+# TODO: automate the process to replace IP's in inventory.ini file and default.conf from ansible_inventory.json
+
 
 output "web_app_instance_private_ip" {
   value = aws_instance.web_app_instance.private_ip
