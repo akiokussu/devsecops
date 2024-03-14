@@ -135,18 +135,28 @@ The project demonstrates a commitment to DevSecOps principles by automating the 
 - **Jenkins Server**: `jenkins_attach` links the `jenkins_policy` to the `jenkins_role`, effectively applying the policy’s permissions to Jenkins servers.
 - **Web Application Server ECR Read Access**: `web_app_ecr_read_policy_attachment` attaches the `ecr_read_policy` to the `web_app_role`, granting the web application servers the required access to ECR.
 
-This IAM setup is critical for enforcing the principle of least privilege across our infrastructure. It ensures that each component operates with only the permissions necessary for its function, reducing the risk of unauthorized access or actions. By tightly controlling IAM roles and policies, we embed security deeply within our infrastructure configuration, aligning with DevSecOps goals of secure, automated, and efficient operations.
-
-
+___
 
 ### ECR Endpoints and Secure Image Retrieval
 - **ECR Endpoints (`ecr-endpoints.tf`)**: Enable secure Docker image retrieval from AWS ECR by Jenkins and application servers within the private subnet, mitigating the risk of exposing them to public networks.
 
-### IAM Roles and Principle of Least Privilege
-- **IAM Roles (`iam.tf`)**: Crafted to provide minimal necessary permissions for each service, which is a core practice in secure cloud operations, ensuring services interact securely and as intended within the AWS ecosystem.
+___
+
+## AWS Network Configuration (`routing.tf`), NAT Gateway (`nat.tf`) and NACLs
 
 ### NAT Gateway and Outbound Internet Access
 - **NAT Gateway (`nat.tf`)**: Facilitates outbound internet connectivity for instances in the private subnet for updates and patching while preventing any direct inbound traffic, preserving the integrity and security of the servers.
+
+### Public Route Table
+
+- **Route**: Configured to direct all outbound traffic (`0.0.0.0/0`) to the Internet Gateway (`aws_internet_gateway.igw`), enabling internet access for resources in the associated subnet.
+- **Association**: The public route table is associated with a specific public subnet (`aws_subnet.public_subnet`), designating it as part of the publicly accessible portion of our network architecture.
+
+### Private Route Table
+
+- **Route**: Outbound traffic from the private subnet is directed to the NAT Gateway (`aws_nat_gateway.nat`), allowing secure internet access while keeping the subnet private.
+- **Association**: This route table is specifically associated with a private subnet (`aws_subnet.private_subnet`), ensuring that the resources within this subnet maintain their private nature while still being able to initiate outbound connections.
+
 
 ## Ansible Playbooks Description
 
