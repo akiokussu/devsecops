@@ -17,6 +17,39 @@ resource "aws_iam_role" "web_app_role" {
   })
 }
 
+# IAM Policy for ECR Read Access for the Web Application Server
+resource "aws_iam_policy" "ecr_read_policy" {
+  name        = "ECRReadAccessPolicy"
+  description = "Policy grants access to ECR for pulling Docker images"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect: "Allow",
+        Action: [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:BatchCheckLayerAvailability"
+        ],
+        Resource: "arn:aws:ecr:eu-central-1:986505030570:repository/your-repository-name"
+      },
+      {
+        Effect: "Allow",
+        Action: [
+          "ecr:GetAuthorizationToken"
+        ],
+        Resource: "*"
+      }
+    ]
+  })
+}
+
+# Attach the ECR Read Access Policy to the Web Application Server's IAM Role
+resource "aws_iam_role_policy_attachment" "web_app_ecr_read_policy_attachment" {
+  role       = aws_iam_role.web_app_role.name
+  policy_arn = aws_iam_policy.ecr_read_policy.arn
+}
+
 # Instance Profile for Web Application Server
 resource "aws_iam_instance_profile" "web_app_profile" {
   name = "web_app_profile"
@@ -77,37 +110,4 @@ resource "aws_iam_role_policy_attachment" "jenkins_attach" {
 resource "aws_iam_instance_profile" "jenkins_profile" {
   name = "jenkins_profile"
   role = aws_iam_role.jenkins_role.name
-}
-
-# IAM Policy for ECR Read Access for the Web Application Server
-resource "aws_iam_policy" "ecr_read_policy" {
-  name        = "ECRReadAccessPolicy"
-  description = "Policy grants access to ECR for pulling Docker images"
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect: "Allow",
-        Action: [
-          "ecr:GetDownloadUrlForLayer",
-          "ecr:BatchGetImage",
-          "ecr:BatchCheckLayerAvailability"
-        ],
-        Resource: "arn:aws:ecr:eu-central-1:986505030570:repository/your-repository-name"
-      },
-      {
-        Effect: "Allow",
-        Action: [
-          "ecr:GetAuthorizationToken"
-        ],
-        Resource: "*"
-      }
-    ]
-  })
-}
-
-# Attach the ECR Read Access Policy to the Web Application Server's IAM Role
-resource "aws_iam_role_policy_attachment" "web_app_ecr_read_policy_attachment" {
-  role       = aws_iam_role.web_app_role.name
-  policy_arn = aws_iam_policy.ecr_read_policy.arn
 }

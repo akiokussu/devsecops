@@ -70,18 +70,18 @@ The project demonstrates a commitment to DevSecOps principles by automating the 
 - **Public Subnet (`subnets.tf`)**: Allocated for resources that need direct internet access, such as bastion host on port 22 (for testing purpose from my home IP), Nginx server on port 443 or NAT Gateway.
 - **Private Subnet (`subnets.tf`)**: Reserved for backend services like Jenkins and web application server, preventing direct exposure to the public internet and enhancing security.
 
-### Jenkins and Application Server
-- **Jenkins Server**: Situated within the private subnet to facilitate secure automation without direct internet exposure (`ec2-instances.tf`).
-- **Web Application Servers**: Also positioned in the private subnet to protect them from direct public access and to maintain security (`ec2-instances.tf`).
+### Jenkins and Application Server (`ec2-instances.tf`)
+- **Jenkins Server**: Situated within the private subnet to facilitate secure automation without direct internet exposure.
+- **Web Application Servers**: Also positioned in the private subnet to protect them from direct public access and to maintain security.
 
-### Nginx Reverse Proxy Server
-- **Nginx Server** (`ec2-instances.tf`): Configured with a security group to permit inbound HTTPS traffic on port 443 with the Self-sign cert., functioning as the entry point for internet traffic to the web application server.
+### Nginx Reverse Proxy Server (`ec2-instances.tf`)
+- **Nginx Server**: Configured with a security group to permit inbound HTTPS traffic on port 443 with the Self-sign cert., functioning as the entry point for internet traffic to the web application server.
 
-### Bastion Server
-- **Bastion** (`ec2-instances.tf`): Provides a secure entry point for administrative tasks.
+### Bastion Server (`ec2-instances.tf`)
+- **Bastion**: Provides a secure entry point for administrative tasks.
 (There are ways to impement management access like VPN+MFA or similar)
 
-## Security Groups Overview
+## Security Groups Overview (`security-groups.tf`)
 
 ### Nginx Security Group (`nginx_sg`)
 - **Purpose**: Serves as the firewall for the Nginx server, which acts as a reverse proxy.
@@ -113,9 +113,7 @@ The project demonstrates a commitment to DevSecOps principles by automating the 
 - **Egress Rules**:
   - Allows outbound connections to manage and interact with other infrastructure components.
 
-## IAM Configuration Overview
-
-Here’s a detailed breakdown of the IAM roles, policies, and instance profiles defined in our (`iam.tf`)
+## IAM Configuration Overview (`iam.tf`)
 
 ### Web Application Server IAM Role
 - **Role Name**: `web_app_role`
@@ -124,13 +122,13 @@ Here’s a detailed breakdown of the IAM roles, policies, and instance profiles 
 
 ### Jenkins Server IAM Role
 - **Role Name**: `jenkins_role`
-- **Purpose**: Similar to the web application server role, it allows Jenkins servers on EC2 to assume the role. It's tailored for CI/CD operations, specifically interacting with AWS services like EC2 and ECR.
+- **Purpose**: Allows the Jenkins server to authenticate to Amazon ECR and manage Docker images as part of the CI/CD process, including pushing new images and updating existing ones.
 - **Policies Attached**: 
   - `jenkins_policy` defines permissions for Jenkins to manage EC2 instances and interact with ECR repositories, including pulling and pushing Docker images.
-- **Instance Profile**: `jenkins_profile` assigns the role to Jenkins servers, granting them the defined capabilities.
+- **Instance Profile**: `jenkins_profile` is tailored to provide Jenkins with the capabilities necessary for interacting with Amazon ECR.
 
 ### IAM Policies
-- **Jenkins Server Policy (`jenkins_policy`)**: Specifies actions Jenkins can perform, such as describing, starting, and stopping EC2 instances, along with comprehensive permissions for managing Docker images in ECR.
+- **Jenkins Server Policy (`jenkins_policy`)**: Specifies actions Jenkins can perform, for managing Docker images in ECR.
 - **ECR Read Access Policy (`ecr_read_policy`)**: Grants web application servers read-only access to ECR repositories, ensuring they can pull necessary Docker images for deployment.
 
 ### Policy Attachments
