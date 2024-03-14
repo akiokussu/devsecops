@@ -1,0 +1,32 @@
+---
+- name: Setup Jenkins in Docker Container
+  hosts: jenkins
+  become: true
+  tasks:
+    - name: Install Docker if missing
+      ansible.builtin.package:
+        name: docker
+        state: present
+
+    - name: Start and enable Docker service
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Pull Jenkins Docker image
+      community.docker.docker_image:
+        name: jenkins/jenkins:lts
+        source: pull
+
+    - name: Run Jenkins Docker container
+      community.docker.docker_container:
+        name: jenkins
+        image: jenkins/jenkins:lts
+        state: started
+        restart_policy: unless-stopped
+        published_ports:
+          - "8080:8080"
+          - "50000:50000"
+        volumes:
+          - "/var/jenkins_home:/var/jenkins_home"

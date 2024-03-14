@@ -1,0 +1,48 @@
+---
+- name: Pre-flight Setup for All Servers
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install common packages
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - openssl
+        - net-tools
+
+- name: Install Docker on Nginx and Jenkins Servers
+  hosts: nginx:jenkins
+  become: true
+
+  tasks:
+    - name: Install Docker and dependencies
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - docker
+        - docker-compose
+
+    - name: Add current user to the Docker group
+      ansible.builtin.user:
+        name: "{{ ansible_env.SUDO_USER | default(ansible_env.USER) }}"
+        group: docker
+        append: yes
+
+    - name: Start and enable Docker service
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+
+- name: Additional Setup for Web Application Server
+  hosts: webapp
+  become: true
+
+  tasks:
+    - name: Ensure git is installed (Example)
+      ansible.builtin.package:
+        name: git
+        state: latest

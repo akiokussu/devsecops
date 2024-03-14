@@ -1,0 +1,4 @@
+# Terraform workspace files
+.terraform/
+
+.DS_Store

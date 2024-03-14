@@ -1,0 +1,4 @@
+---
+- import_playbook: pre-flight.yml
+- import_playbook: setup-nginx.yml
+- import_playbook: setup-jenkins.yml

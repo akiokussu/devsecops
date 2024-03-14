@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+    environment {
+        DOCKER_IMAGE = 'webapp-aws-devsecops'
+        ECR_REGISTRY = '986505030570.dkr.ecr.eu-central-1.amazonaws.com'
+        REPO_NAME = 'miranda_devsecops'
+        PROJECT_DIR = 'webapp-aws-devsecops'
+        AWS_DEFAULT_REGION = 'eu-central-1'
+    }
+    stages {
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                dir("${env.PROJECT_DIR}") {
+                    script {
+                        docker.build("${ECR_REGISTRY}/${REPO_NAME}:latest")
+                    }
+                }
+            }
+        }
+        stage('Trivy Vulnerability Scan') {
+            steps {
+                dir("${env.PROJECT_DIR}") {
+                    script {
+                        sh 'which trivy || { echo "Installing Trivy"; curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin; }'
+                        sh "trivy image --exit-code 1 --no-progress ${ECR_REGISTRY}/${REPO_NAME}:latest"
+                    }
+                }
+            }
+        }
+        stage('Push to ECR') {
+            steps {
+                dir("${env.PROJECT_DIR}") {
+                    script {
+                        docker.withRegistry("https://${ECR_REGISTRY}", "ecr:${AWS_DEFAULT_REGION}:ecr-auth") {
+                            docker.image("${ECR_REGISTRY}/${REPO_NAME}:latest").push()
+                        }
+                    }
+                }
+            }
+        }
+        stage('Deploy to Web Application Server') {
+            steps {
+                script {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'ssh-deploy-key', keyFileVariable: 'SSH_KEY')]) {
+                        sh "scp -i ${SSH_KEY} /path/to/docker-compose.yml user@web_application_server_ip:/path/on/server/"
+                        sh "ssh -i ${SSH_KEY} user@web_application_server_ip 'cd /path/on/server && docker-compose up -d'"
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            // Clean up steps, such as notifying team members on Slack, could go here.
+        }
+    }
+}

@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  webapp:
+    image: 986505030570.dkr.ecr.eu-central-1.amazonaws.com/miranda_devsecops:latest
+    ports:
+      - "80:80"
+    restart: unless-stopped
+  
