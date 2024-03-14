@@ -3,6 +3,13 @@
   become: yes
 
   tasks:
+
+    - name: Update and upgrade all packages
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: yes
+        cache_valid_time: 3600
+
     - name: Disable root SSH login
       ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config
@@ -16,6 +23,25 @@
         regexp: '^PasswordAuthentication'
         line: 'PasswordAuthentication no'
         state: present
+        
+    # Optional
+    # - name: Ensure Fail2Ban is installed
+    #   ansible.builtin.package:
+    #     name: fail2ban
+    #     state: present
+
+    # - name: Start and enable Fail2Ban service
+    #   ansible.builtin.service:
+    #     name: fail2ban
+    #     state: started
+    #     enabled: true
+
+    # - name: Allow SSH through the firewall
+    #   ansible.builtin.firewall:
+    #     port: 22
+    #     state: enabled
+    #     permanent: true
+    #     immediate: true
 
     - name: Restart SSH to apply changes
       ansible.builtin.service:
