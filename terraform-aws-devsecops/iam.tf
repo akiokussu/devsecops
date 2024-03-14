@@ -52,9 +52,6 @@ resource "aws_iam_policy" "jenkins_policy" {
     Statement = [
       {
         Action = [
-          "ec2:DescribeInstances",
-          "ec2:StartInstances",
-          "ec2:StopInstances",
           // permissions for ECR
           "ecr:GetAuthorizationToken",
           "ecr:BatchCheckLayerAvailability",

@@ -63,11 +63,11 @@ The project demonstrates a commitment to DevSecOps principles by automating the 
 - Trivy for vuln analysis
 - Common sense and a lot of beers :) 
 
-## Infrastructure Security Design
+# Infrastructure Design
 
-### VPC and Subnet Layout
+## VPC and Subnet Layout Overview
 - **VPC (`vpc.tf`)**: Establishes an isolated network environment within AWS, encapsulating all project resources.
-- **Public Subnet (`subnets.tf`)**: Allocated for resources that need direct internet access, such as bastion hosts on port 22 (for testing purpose from my home IP), Nginx server on port 443 or NAT Gateways.
+- **Public Subnet (`subnets.tf`)**: Allocated for resources that need direct internet access, such as bastion host on port 22 (for testing purpose from my home IP), Nginx server on port 443 or NAT Gateway.
 - **Private Subnet (`subnets.tf`)**: Reserved for backend services like Jenkins and web application server, preventing direct exposure to the public internet and enhancing security.
 
 ### Jenkins and Application Server
@@ -81,7 +81,7 @@ The project demonstrates a commitment to DevSecOps principles by automating the 
 - **Bastion** (`ec2-instances.tf`): Provides a secure entry point for administrative tasks.
 (There are ways to impement management access like VPN+MFA or similar)
 
-### Security Groups:
+## Security Groups Overview
 
 ### Nginx Security Group (`nginx_sg`)
 - **Purpose**: Serves as the firewall for the Nginx server, which acts as a reverse proxy.
@@ -112,6 +112,34 @@ The project demonstrates a commitment to DevSecOps principles by automating the 
   - SSH (Port 22): Narrowly allows connections from a specified IP address, providing a secure entry point for administrators.
 - **Egress Rules**:
   - Allows outbound connections to manage and interact with other infrastructure components.
+
+## IAM Configuration Overview
+
+Here’s a detailed breakdown of the IAM roles, policies, and instance profiles defined in our (`iam.tf`)
+
+### Web Application Server IAM Role
+- **Role Name**: `web_app_role`
+- **Purpose**: Grants the web application servers running on EC2 instances the necessary permissions to assume the role, allowing actions specified in attached policies.
+- **Instance Profile**: `web_app_profile` binds this role to EC2 instances, enabling them to adopt the permissions associated with the role.
+
+### Jenkins Server IAM Role
+- **Role Name**: `jenkins_role`
+- **Purpose**: Similar to the web application server role, it allows Jenkins servers on EC2 to assume the role. It's tailored for CI/CD operations, specifically interacting with AWS services like EC2 and ECR.
+- **Policies Attached**: 
+  - `jenkins_policy` defines permissions for Jenkins to manage EC2 instances and interact with ECR repositories, including pulling and pushing Docker images.
+- **Instance Profile**: `jenkins_profile` assigns the role to Jenkins servers, granting them the defined capabilities.
+
+### IAM Policies
+- **Jenkins Server Policy (`jenkins_policy`)**: Specifies actions Jenkins can perform, such as describing, starting, and stopping EC2 instances, along with comprehensive permissions for managing Docker images in ECR.
+- **ECR Read Access Policy (`ecr_read_policy`)**: Grants web application servers read-only access to ECR repositories, ensuring they can pull necessary Docker images for deployment.
+
+### Policy Attachments
+- **Jenkins Server**: `jenkins_attach` links the `jenkins_policy` to the `jenkins_role`, effectively applying the policy’s permissions to Jenkins servers.
+- **Web Application Server ECR Read Access**: `web_app_ecr_read_policy_attachment` attaches the `ecr_read_policy` to the `web_app_role`, granting the web application servers the required access to ECR.
+
+This IAM setup is critical for enforcing the principle of least privilege across our infrastructure. It ensures that each component operates with only the permissions necessary for its function, reducing the risk of unauthorized access or actions. By tightly controlling IAM roles and policies, we embed security deeply within our infrastructure configuration, aligning with DevSecOps goals of secure, automated, and efficient operations.
+
+
 
 ### ECR Endpoints and Secure Image Retrieval
 - **ECR Endpoints (`ecr-endpoints.tf`)**: Enable secure Docker image retrieval from AWS ECR by Jenkins and application servers within the private subnet, mitigating the risk of exposing them to public networks.
