@@ -142,21 +142,30 @@ ___
 
 ___
 
-## AWS Network Configuration (`routing.tf`), NAT Gateway (`nat.tf`) and NACLs
+## AWS Network Configurations (`routing.tf`), NAT Gateway (`nat.tf`) and NACLs (`nacls.tf`)
 
 ### NAT Gateway and Outbound Internet Access
 - **NAT Gateway (`nat.tf`)**: Facilitates outbound internet connectivity for instances in the private subnet for updates and patching while preventing any direct inbound traffic, preserving the integrity and security of the servers.
 
 ### Public Route Table
-
 - **Route**: Configured to direct all outbound traffic (`0.0.0.0/0`) to the Internet Gateway (`aws_internet_gateway.igw`), enabling internet access for resources in the associated subnet.
 - **Association**: The public route table is associated with a specific public subnet (`aws_subnet.public_subnet`), designating it as part of the publicly accessible portion of our network architecture.
 
 ### Private Route Table
-
 - **Route**: Outbound traffic from the private subnet is directed to the NAT Gateway (`aws_nat_gateway.nat`), allowing secure internet access while keeping the subnet private.
 - **Association**: This route table is specifically associated with a private subnet (`aws_subnet.private_subnet`), ensuring that the resources within this subnet maintain their private nature while still being able to initiate outbound connections.
 
+
+### Public Subnet NACL Configuration
+
+- **HTTPS Inbound**: Allows inbound traffic on TCP port 443 (HTTPS) from any source, enabling secure web access to our services.
+- **SSH Inbound**: Permits SSH access (port 22) from trusted sources, facilitating secure administration of resources within the public subnet.
+- **All Outbound**: Allows all outbound traffic from resources within the public subnet, ensuring they can initiate connections to the internet or other AWS services as required.
+
+### Private Subnet NACL Configuration
+
+- **SSH Inbound**: Allows SSH access (port 22) from the public subnet, ensuring administrators can securely manage private resources.
+- **All Outbound**: Permits all outbound traffic, allowing responses to inbound requests and necessary external communications from resources within the private subnet, while still preventing direct inbound internet access.
 
 ## Ansible Playbooks Description
 

@@ -1,3 +1,4 @@
+#TOO restricted?
 # NACL for Public Subnet
 resource "aws_network_acl" "public_nacl" {
   vpc_id = aws_vpc.devsecops_vpc.id
@@ -6,8 +7,7 @@ resource "aws_network_acl" "public_nacl" {
   }
 }
 
-# Allow HTTP, HTTPS, and SSH inbound on Public NACL
-
+# Allow HTTPS and SSH inbound on Public NACL
 resource "aws_network_acl_rule" "public_inbound_https" {
   network_acl_id = aws_network_acl.public_nacl.id
   rule_number    = 100
@@ -21,7 +21,7 @@ resource "aws_network_acl_rule" "public_inbound_https" {
 
 resource "aws_network_acl_rule" "public_inbound_ssh" {
   network_acl_id = aws_network_acl.public_nacl.id
-  rule_number    = 120
+  rule_number    = 110
   rule_action    = "allow"
   egress         = false
   protocol       = "tcp"
