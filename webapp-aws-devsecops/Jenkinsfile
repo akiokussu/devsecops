@@ -9,9 +9,6 @@ pipeline {
         AWS_DEFAULT_REGION = 'eu-central-1'
         SLACK_CHANNEL = '#slack_channel'
         
-        // fetch credentials for the web applications servser
-        WEB_APP_SERVER_IP = credentials('web-app-server-ip') 
-        WEB_APP_USER = credentials('web-app-user') 
     }
     
     stages {
@@ -56,7 +53,7 @@ pipeline {
             steps {
                 dir("${env.PROJECT_DIR}") {
                     script {
-                        // No need for username:password becouse I have attached the proper IAM role+policy
+                        // No need for username:password becouse I have attached the proper IAM role&policy
                         sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
                         docker.image("${ECR_REGISTRY}/${REPO_NAME}:latest").push()
                     }
