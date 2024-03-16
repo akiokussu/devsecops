@@ -46,3 +46,18 @@
       ansible.builtin.package:
         name: git
         state: latest
+
+- name: Ensure pip and AWS CLI are installed
+  hosts: all
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - python3-pip
+  become: yes
+
+- name: Install AWS CLI
+  hosts: all
+  ansible.builtin.pip:
+    name: awscli
+    state: latest

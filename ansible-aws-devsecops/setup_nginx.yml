@@ -28,24 +28,14 @@
         state: directory
         mode: '0755'
 
-    - name: Generate self-signed SSL certificate and key for miranda.com
-      community.crypto.openssl_req:
-        path: /etc/ssl/nginx/miranda.com.crt
-        privatekey_path: /etc/ssl/nginx/miranda.com.key
-        common_name: miranda.com
-        country_name: US
-        organization_name: Miranda Inc
-        email_address: admin@miranda.com
-        basic_constraints:
-          - "CA:TRUE"
-        key_usage:
-          - digitalSignature
-          - keyEncipherment
-        extended_key_usage:
-          - serverAuth
-        subject_alt_name:
-          - DNS:miranda.com
+    - name: Copy existing self-signed SSL certificate and key for miranda.com
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
         mode: '0644'
+      loop:
+        - { src: '../cert/miranda.com.crt', dest: '/etc/ssl/nginx/miranda.com.crt' }
+        - { src: '../cert/miranda.com.key', dest: '/etc/ssl/nginx/miranda.com.key' }
 
     - name: Copy Nginx configuration to server
       ansible.builtin.copy:
