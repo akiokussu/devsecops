@@ -1,4 +1,5 @@
 # Terraform workspace files
 .terraform/
+./cert
 
 .DS_Store

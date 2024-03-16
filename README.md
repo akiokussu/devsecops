@@ -5,6 +5,8 @@
 The goal of this project is to implement a DevSecOps pipeline to build and secure a cloud environment for hosting a dymmy website/webapp. The website/webapp is designed to present simple content and must be accessible via a TLS connection only, ensuring that all data transmitted remains encrypted.
 <br> **Will use self-sign cert**
 
+<br>**Unfortunately, in the current setup, I will not be utilizing an Application Load Balancer (ALB) combined with AWS WAF  due to the cost implications :(((**
+
 ## Short Description
 
 This repository contains the infrastructure as code (IaC) scripts, ansible scripts and web application code with CI/CD pipeline configurations necessary to deploy a secure and resilient cloud-hosted website/webapp. 
