@@ -17,7 +17,7 @@ The project demonstrates a commitment to DevSecOps principles by automating the 
 
 ## Architecture Diagram
 
-![DevSecOps Architecture Diagram](architecture-diagram.png)
+![DevSecOps Architecture Diagram](diagram.png)
 
 ## Project Tree
 

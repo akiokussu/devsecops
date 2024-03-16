@@ -25,7 +25,8 @@ resource "aws_network_acl_rule" "public_inbound_ssh" {
   rule_action    = "allow"
   egress         = false
   protocol       = "tcp"
-  cidr_block     = "0.0.0.0/0"
+  # My home ip 
+  cidr_block     = "77.126.22.18/32"
   from_port      = 22
   to_port        = 22
 }
@@ -56,7 +57,7 @@ resource "aws_network_acl" "private_nacl" {
   }
 }
 
-# Allow SSH and Database access inbound on Private NACL (example for database access on port 3306)
+# Allow SSH
 resource "aws_network_acl_rule" "private_inbound_ssh" {
   network_acl_id = aws_network_acl.private_nacl.id
   rule_number    = 100
