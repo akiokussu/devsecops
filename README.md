@@ -191,8 +191,6 @@ ___
 
 - **Deploy to Web Application Server**: The deployment stage transfers the `docker-compose.yml` to the web application server and starts or updates the application using `docker-compose up`, secured with SSH credentials stored in Jenkins.
 
-### Post-Build Actions
-
 - **Notification**: Upon completion, the pipeline notifies a specified Slack channel about the build outcome, ensuring immediate awareness and action if needed.
 
 ### Security and Compliance
