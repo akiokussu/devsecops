@@ -30,14 +30,20 @@ The project demonstrates a commitment to DevSecOps principles by automating the 
 │   ├── main.yml
 │   ├── pre-flight.yml
 │   ├── secure_servers.yml
-│   ├── setup-jenkins.yml
+│   ├── setup-jenkins_trivy.yml
 │   └── setup_nginx.yml
+├── cert
+│   ├── miranda.com.crt
+│   └── miranda.com.key
+├── diagram.png
 ├── terraform-aws-devsecops
 │   ├── ec2-instances.tf
 │   ├── ecr-endpoints.tf
 │   ├── iam.tf
+│   ├── nacls.tf
 │   ├── nat.tf
 │   ├── outputs.tf
+│   ├── plan.tfplan
 │   ├── provider.tf
 │   ├── routing.tf
 │   ├── security-groups.tf
