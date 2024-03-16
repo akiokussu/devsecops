@@ -9,7 +9,7 @@ pipeline {
         AWS_DEFAULT_REGION = 'eu-central-1'
         SLACK_CHANNEL = '#slack_channel'
         
-        // fetch credentials
+        // fetch credentials for the web applications servser
         WEB_APP_SERVER_IP = credentials('web-app-server-ip') 
         WEB_APP_USER = credentials('web-app-user') 
     }
@@ -34,11 +34,19 @@ pipeline {
                 dir("${env.PROJECT_DIR}") {
                     script {
                         try {
-                            // Be
-                            sh "docker run -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.49.1 ${ECR_REGISTRY}/${REPO_NAME}:latest"
+                            //Scan & Store the output to JSON 
+                            // Added exit code https://aquasecurity.github.io/trivy/v0.17.2/examples/others/#:~:text=Others-,Exit%20Code,even%20when%20vulnerabilities%20are%20detected.
+                            // Add --severity HIGH,CRITICAL ??? 
+                            def trivyOutputJson = sh(script: "docker run -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.49.1 --exit-code 1 -f json -o output.json ${ECR_REGISTRY}/${REPO_NAME}:latest && cat output.json", returnStdout: true).trim()
+                            //Parse the JSON
+                            def parsedJson = readJSON text: trivyOutputJson
+                            //print needed info 
+                            parsedJson.each { vuln ->
+                                echo "Vulnerability ID: ${vuln.VulnerabilityID}, Severity: ${vuln.Severity}, Package: ${vuln.PkgName}"
+                            }
                         } catch (Exception e) {
-                            notifySlack(channel: "${SLACK_CHANNEL}", message: "Trivy vulnerability scan failed for ${REPO_NAME}:latest. Please check Jenkins for details.")
-                            throw e
+                            notifySlack(channel: "${SLACK_CHANNEL}", message: "Vulnerabilities found in ${REPO_NAME}:latest. Review and remediation required")
+                            error "Stopping build due to vulnerabilities found by Trivy."
                         }
                     }
                 }
@@ -57,7 +65,7 @@ pipeline {
         stage('Deploy to Web Application Server') {
             steps {
                 script {
-                    sshagent(['ssh-deploy-key']) { // ID of the SSH private key credential from Jenkins
+                    sshagent(['ssh-deploy-key']) { // ID for the SSH private key credentials in Jenkins
                         sh "scp ${env.PROJECT_DIR}/docker-compose.yml ${WEB_APP_USER}@${WEB_APP_SERVER_IP}:/home/ubuntu"
                         sh "ssh ${WEB_APP_USER}@${WEB_APP_SERVER_IP} 'cd /home/ubuntu && docker-compose up -d'"
                     }
@@ -68,7 +76,7 @@ pipeline {
     }
     post {
         always {
-            // Clean up steps, such as notifying team members on Slack, could go here.
+            // Clean up steps, such as notifying team members on Slack
         }
     }
 }
