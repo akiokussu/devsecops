@@ -83,4 +83,5 @@ resource "aws_network_acl_rule" "private_outbound_all" {
 # Associate Private NACL with Private Subnet
 resource "aws_network_acl_association" "private_nacl_association" {
   network_acl_id = aws_network_acl.private_nacl.id
-  subnet_id      = aws_subnet.private_subnet
+  subnet_id      = aws_subnet.private_subnet.id
+}
