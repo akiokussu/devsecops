@@ -167,7 +167,35 @@ ___
 - **SSH Inbound**: Allows SSH access (port 22) from the public subnet, ensuring administrators can securely manage private resources.
 - **All Outbound**: Permits all outbound traffic, allowing responses to inbound requests and necessary external communications from resources within the private subnet, while still preventing direct inbound internet access.
 
-## Ansible Playbooks Description
+## Jenkins CI/CD Pipeline Overview
+
+### Ansible Playbooks Description
+
+### Pipeline Stages
+
+- **Checkout Code**: The pipeline initiates by checking out the latest version of the source code, ensuring that all actions are based on the most current codebase.
+
+- **Build Docker Image**: This stage builds a Docker image containing the web application, tagged as 'latest', preparing it for both security scanning and deployment.
+
+- **Trivy Vulnerability Scan**: Prioritizing security, we use Trivy to scan the newly built Docker image for known vulnerabilities. If vulnerabilities are detected, the pipeline is halted, a Slack notification is sent, and the build fails, preventing the deployment of vulnerable code.
+
+- **Push to ECR**: Post security validation, the Docker image is pushed to Amazon Elastic Container Registry (ECR), using AWS credentials for secure authentication.
+
+- **Deploy to Web Application Server**: The deployment stage transfers the `docker-compose.yml` to the web application server and starts or updates the application using `docker-compose up`, secured with SSH credentials stored in Jenkins.
+
+### Post-Build Actions
+
+- **Notification**: Upon completion, the pipeline notifies a specified Slack channel about the build outcome, ensuring immediate awareness and action if needed.
+
+### Security and Compliance
+
+- Integrating Trivy scans directly into the pipeline embodies the DevSecOps principle of "shifting left", addressing security issues early in the development lifecycle.
+
+- Best practices for credential management are employed, securely fetching necessary credentials at runtime, including AWS credentials for ECR and SSH credentials for server deployment.
+
+### Conclusion
+
+This Jenkins CI/CD pipeline is a key component of our DevSecOps workflow, automating the journey from code commit to deployment while embedding essential security checks. By enforcing a build failure upon detecting vulnerabilities, we maintain high security standards, underscoring our dedication to secure, reliable software development.
 
 Each playbook and configuration file plays a vital role in establishing a secure and automated infrastructure, aligning with the DevSecOps principles. Here's a closer look at their functions:
 

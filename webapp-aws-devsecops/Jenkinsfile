@@ -56,6 +56,7 @@ pipeline {
             steps {
                 dir("${env.PROJECT_DIR}") {
                     script {
+                        // No need for username:password becouse I have attached the proper IAM role+policy
                         sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
                         docker.image("${ECR_REGISTRY}/${REPO_NAME}:latest").push()
                     }
@@ -65,9 +66,17 @@ pipeline {
         stage('Deploy to Web Application Server') {
             steps {
                 script {
-                    sshagent(['ssh-deploy-key']) { // ID for the SSH private key credentials in Jenkins
-                        sh "scp ${env.PROJECT_DIR}/docker-compose.yml ${WEB_APP_USER}@${WEB_APP_SERVER_IP}:/home/ubuntu"
-                        sh "ssh ${WEB_APP_USER}@${WEB_APP_SERVER_IP} 'cd /home/ubuntu && docker-compose up -d'"
+                    // Inject secured credentials and environment variables
+                    withCredentials([
+                        sshUserPrivateKey(credentialsId: '<SSH_KEY_ID_HERE>', keyFileVariable: 'DEPLOY_SSH_KEY'),
+                        string(credentialsId: 'web-app-server-ip-id', variable: 'WEB_APP_SERVER_IP'),
+                        string(credentialsId: 'web-app-user-id', variable: 'WEB_APP_USER')
+                    ]) {
+                        // Secure deployment using sshagent
+                        sshagent(credentials: ['jenkins-deploy-key']) {
+                            sh "scp ${env.PROJECT_DIR}/docker-compose.yml ${WEB_APP_USER}@${WEB_APP_SERVER_IP}:/home/ubuntu"
+                            sh "ssh ${WEB_APP_USER}@${WEB_APP_SERVER_IP} 'cd /home/ubuntu && docker-compose up -d'"
+                        }
                     }
                 }
             }
