@@ -6,6 +6,7 @@ The goal of this project is to implement a DevSecOps pipeline to build and secur
 <br> **Will use self-sign cert**
 
 <br>**Unfortunately, in the current setup, I will not be utilizing an Application Load Balancer (ALB) combined with AWS WAF  due to the cost implications :(((**
+<br>** Will use NGINX server instead :)**
 
 ## Short Description
 
